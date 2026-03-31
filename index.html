@@ -72,42 +72,42 @@
         }
 
         h1 {
-            font-size: 4rem;
+            font-size: 8vmin;
             color: var(--primary);
-            text-shadow: 4px 4px 0 var(--accent), 0 0 20px rgba(255, 69, 0, 0.5);
-            margin-bottom: 2rem;
+            text-shadow: 0.5vmin 0.5vmin 0 var(--accent), 0 0 2vmin rgba(255, 69, 0, 0.5);
+            margin-bottom: 2vmin;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 0.2vmin;
         }
 
         .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 1.5rem 3rem;
-            font-size: 1.5rem;
+            padding: 2vmin 4vmin;
+            font-size: 3vmin;
             font-weight: bold;
-            border-radius: 50px;
+            border-radius: 5vmin;
             cursor: pointer;
             transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-            margin: 0.5rem;
+            margin: 1vmin;
             text-transform: uppercase;
-            box-shadow: 0 6px 0 #b33000;
+            box-shadow: 0 1vmin 0 #b33000;
         }
 
         .btn:hover {
-            transform: scale(1.05) translateY(-2px);
+            transform: scale(1.05) translateY(-0.5vmin);
             background: #ff571a;
         }
 
         .btn:active {
-            transform: scale(0.98) translateY(2px);
-            box-shadow: 0 2px 0 #b33000;
+            transform: scale(0.98) translateY(0.5vmin);
+            box-shadow: 0 0.3vmin 0 #b33000;
         }
 
         .btn-secondary {
             background: var(--secondary);
-            box-shadow: 0 6px 0 #008fbf;
+            box-shadow: 0 1vmin 0 #008fbf;
         }
 
         .btn-secondary:hover {
@@ -120,33 +120,33 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 20px;
+            padding: 2vmin;
             display: flex;
             justify-content: space-between;
             pointer-events: none;
             z-index: 5;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            text-shadow: 0.3vmin 0.3vmin 0.6vmin rgba(0,0,0,0.8);
         }
 
         .hud-item {
-            font-size: 1.8rem;
+            font-size: 3vmin;
             font-weight: bold;
             background: rgba(0,0,0,0.5);
-            padding: 10px 20px;
-            border-radius: 15px;
-            border: 2px solid var(--secondary);
+            padding: 1vmin 2vmin;
+            border-radius: 2vmin;
+            border: 0.3vmin solid var(--secondary);
         }
 
         #combo-container {
             position: absolute;
-            top: 100px;
-            right: 20px;
+            top: 10vmin;
+            right: 2vmin;
             text-align: right;
             pointer-events: none;
         }
 
         .combo-text {
-            font-size: 2.5rem;
+            font-size: 4vmin;
             color: var(--accent);
             font-style: italic;
             text-transform: uppercase;
@@ -161,12 +161,12 @@
         }
 
         .combo-bar {
-            width: 150px;
-            height: 10px;
+            width: 20vmin;
+            height: 1.5vmin;
             background: rgba(255,255,255,0.2);
-            border-radius: 5px;
+            border-radius: 1vmin;
             overflow: hidden;
-            margin-top: 5px;
+            margin-top: 0.5vmin;
         }
 
         .combo-fill {
@@ -177,23 +177,23 @@
         }
         /* Armory */
         #armory-screen {
-            padding: 2rem;
+            padding: 4vmin;
             overflow-y: auto;
         }
 
         .blaster-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 2rem;
-            max-width: 800px;
+            gap: 2vmin;
+            margin-top: 2vmin;
+            max-width: 80vmin;
         }
 
         .blaster-card {
             background: rgba(255,255,255,0.1);
-            border: 3px solid #444;
-            border-radius: 20px;
-            padding: 20px;
+            border: 0.4vmin solid #444;
+            border-radius: 3vmin;
+            padding: 2vmin;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -209,8 +209,8 @@
         }
 
         .blaster-stats {
-            font-size: 1rem;
-            margin-top: 10px;
+            font-size: 2vmin;
+            margin-top: 1vmin;
         }
         /* Announcer */
         #announcer-text {
@@ -218,9 +218,9 @@
             top: 40%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            font-size: 5rem;
+            font-size: 10vmin;
             color: var(--accent);
-            text-shadow: 0 0 20px rgba(255,215,0,0.8);
+            text-shadow: 0 0 3vmin rgba(255,215,0,0.8);
             pointer-events: none;
             z-index: 20;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -231,10 +231,25 @@
         #announcer-text.active {
             transform: translate(-50%, -50%) scale(1);
         }
+
+        /* Portrait Warning */
+        #portrait-warning {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #fff;
+            justify-content: center; align-items: center;
+            z-index: 9999; text-align: center; padding: 20px;
+        }
+
+        @media (orientation: portrait) {
+            #portrait-warning { display: flex; }
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
+        <div id="portrait-warning"><h1>Please Rotate Your Device</h1><p>Landscape mode is recommended for the best experience!</p></div>
         <canvas id="gameCanvas"></canvas>
         <div id="announcer-text">COMBO!</div>
         
