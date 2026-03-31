@@ -271,6 +271,7 @@
             <div style="margin-bottom: 2rem; font-size: 1.5rem; color: var(--accent);">TOKENS: <span id="token-count">0</span></div>
             <button class="btn" onclick="game.startArcade()">Play Arcade</button>
             <button class="btn btn-secondary" onclick="game.startEndless()">Endless Mode</button>
+            <button class="btn btn-secondary" onclick="game.startProChallenge()">Pro Challenge</button>
             <button class="btn btn-secondary" onclick="game.startPassAndPlay()">2-Player Battle</button>
             <button class="btn btn-secondary" onclick="game.openArmory()">Blaster Armory</button>
             <button class="btn btn-secondary" onclick="game.openSettings()">Settings</button>
@@ -652,6 +653,7 @@
                 document.getElementById('hud').style.display = 'flex';
                 document.getElementById('level-display').textContent = level.name.toUpperCase();
                 
+                this.isProMode = false; // Reset by default
                 this.spawnLevel();
             }
 
@@ -676,20 +678,21 @@
                 const p = Math.random();
                 let target;
 
-                if (this.currentLevel === 0) {
+                if (this.currentLevel === 0 && !this.isProMode) {
                     target = new BullseyeTarget(x, y);
-                } else if (this.currentLevel === 1) {
+                } else if (this.currentLevel === 1 && !this.isProMode) {
                     target = p < 0.7 ? new BullseyeTarget(x, y) : new PopUpTarget(x, y);
-                } else if (this.currentLevel === 2) {
+                } else if (this.currentLevel === 2 && !this.isProMode) {
                     if (p < 0.4) target = new BullseyeTarget(x, y);
                     else if (p < 0.7) target = new PopUpTarget(x, y);
                     else target = new SwingingTarget(x, y);
-                } else if (this.currentLevel === 3) {
+                } else if (this.currentLevel === 3 && !this.isProMode) {
                     if (p < 0.3) target = new BullseyeTarget(x, y);
                     else if (p < 0.5) target = new BouncingTarget(x, y);
                     else if (p < 0.8) target = new DroneTarget(x, y);
                     else target = new SwingingTarget(x, y);
                 } else {
+                    // Level 4 or Pro Mode
                     if (p < 0.2) target = new BullseyeTarget(x, y);
                     else if (p < 0.4) target = new MovingWallTarget(x, y);
                     else if (p < 0.6) target = new DroneTarget(x, y);
@@ -697,9 +700,17 @@
                     else target = new PopUpTarget(x, y);
                 }
 
+                if (this.isProMode) {
+                    target.radius *= 0.7; // Smaller targets
+                    target.points *= 2;    // Double points
+                    target.lifeTime *= 0.6; // Faster expiry
+                }
+
                 // Chance for Golden Target
                 if (Math.random() < 0.05) {
-                    this.targets.push(new GoldenTarget(rand(margin, CANVAS_WIDTH-margin), rand(margin, CANVAS_HEIGHT-margin)));
+                    const gt = new GoldenTarget(rand(margin, CANVAS_WIDTH-margin), rand(margin, CANVAS_HEIGHT-margin));
+                    if (this.isProMode) gt.radius *= 0.7;
+                    this.targets.push(gt);
                 }
 
                 this.targets.push(target);
@@ -806,7 +817,8 @@
             spawnLevel(customRate) {
                 if (this.spawnInterval) clearInterval(this.spawnInterval);
                 const level = this.levelData[this.currentLevel];
-                const rate = customRate || level.spawnRate;
+                let rate = customRate || level.spawnRate;
+                if (this.isProMode) rate *= 0.5; // 2x faster
                 this.spawnInterval = setInterval(() => {
                     if (this.state === 'PLAYING') {
                         this.spawnTarget();
@@ -822,6 +834,15 @@
                 this.startArcade(0);
                 document.getElementById('level-display').textContent = isP2 ? "PLAYER 2 TURN" : "PLAYER 1 TURN";
                 document.getElementById('player-label').textContent = "";
+            }
+
+            startProChallenge() {
+                this.gameMode = 'PRO';
+                this.startArcade(4); // Start on the final level
+                this.timeRemaining = 60;
+                document.getElementById('level-display').textContent = "PRO CHALLENGE";
+                // Modifiers for Pro mode
+                this.isProMode = true;
             }
 
             update(dt) {
