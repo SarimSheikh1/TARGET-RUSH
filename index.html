@@ -93,6 +93,26 @@
             margin: 1vmin;
             text-transform: uppercase;
             box-shadow: 0 1vmin 0 #b33000;
+            width: 100%; /* Fill container */
+            max-width: 40vmin;
+        }
+
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1vmin;
+            width: 90%;
+            max-width: 80vmin;
+            justify-items: center;
+        }
+
+        @media (orientation: landscape) and (max-height: 600px) {
+            .menu-grid {
+                grid-template-columns: 1fr 1fr;
+                max-width: 95vw;
+            }
+            h1 { font-size: 6vmin; margin-bottom: 1vmin; }
         }
 
         .btn:hover {
@@ -268,14 +288,16 @@
         <!-- Main Menu -->
         <div id="main-menu" class="overlay active">
             <h1>Target Rush</h1>
-            <div style="margin-bottom: 2rem; font-size: 1.5rem; color: var(--accent);">TOKENS: <span id="token-count">0</span></div>
-            <button class="btn" onclick="game.startArcade()">Play Arcade</button>
-            <button class="btn btn-secondary" onclick="game.startEndless()">Endless Mode</button>
-            <button class="btn btn-secondary" onclick="game.startProChallenge()">Pro Challenge</button>
-            <button class="btn btn-secondary" onclick="game.startPassAndPlay()">2-Player Battle</button>
-            <button class="btn btn-secondary" onclick="game.openArmory()">Blaster Armory</button>
-            <button class="btn btn-secondary" onclick="game.openSettings()">Settings</button>
-            <button class="btn btn-secondary" id="fullscreen-btn" onclick="game.toggleFullscreen()">Go Fullscreen</button>
+            <div style="margin-bottom: 1vmin; font-size: 1.5rem; color: var(--accent);">TOKENS: <span id="token-count">0</span></div>
+            <div class="menu-grid">
+                <button class="btn" onclick="game.startArcade()">Play Arcade</button>
+                <button class="btn btn-secondary" onclick="game.startEndless()">Endless Mode</button>
+                <button class="btn btn-secondary" onclick="game.startProChallenge()">Pro Challenge</button>
+                <button class="btn btn-secondary" onclick="game.startPassAndPlay()">2-Player Battle</button>
+                <button class="btn btn-secondary" onclick="game.openArmory()">Blaster Armory</button>
+                <button class="btn btn-secondary" onclick="game.openSettings()">Settings</button>
+            </div>
+            <button class="btn btn-secondary" id="fullscreen-btn" onclick="game.toggleFullscreen()" style="max-width: 60vmin; margin-top: 1vmin;">Go Fullscreen</button>
         </div>
 
         <!-- Settings Screen -->
