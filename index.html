@@ -72,7 +72,7 @@
         }
 
         h1 {
-            font-size: 8vmin;
+            font-size: clamp(2rem, 10vmin, 6rem);
             color: var(--primary);
             text-shadow: 0.5vmin 0.5vmin 0 var(--accent), 0 0 2vmin rgba(255, 69, 0, 0.5);
             margin-bottom: 2vmin;
@@ -84,8 +84,8 @@
             background: var(--primary);
             color: white;
             border: none;
-            padding: 2vmin 4vmin;
-            font-size: 3vmin;
+            padding: clamp(10px, 2vmin, 20px) clamp(20px, 4vmin, 40px);
+            font-size: clamp(1rem, 4vmin, 2rem);
             font-weight: bold;
             border-radius: 5vmin;
             cursor: pointer;
@@ -129,7 +129,7 @@
         }
 
         .hud-item {
-            font-size: 3vmin;
+            font-size: clamp(0.8rem, 3.5vmin, 2.5rem);
             font-weight: bold;
             background: rgba(0,0,0,0.5);
             padding: 1vmin 2vmin;
@@ -146,7 +146,7 @@
         }
 
         .combo-text {
-            font-size: 4vmin;
+            font-size: clamp(1rem, 5vmin, 3rem);
             color: var(--accent);
             font-style: italic;
             text-transform: uppercase;
@@ -161,8 +161,8 @@
         }
 
         .combo-bar {
-            width: 20vmin;
-            height: 1.5vmin;
+            width: 25vmin;
+            height: 2vmin;
             background: rgba(255,255,255,0.2);
             border-radius: 1vmin;
             overflow: hidden;
@@ -186,7 +186,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 2vmin;
             margin-top: 2vmin;
-            max-width: 80vmin;
+            max-width: 90vmin;
         }
 
         .blaster-card {
@@ -209,7 +209,7 @@
         }
 
         .blaster-stats {
-            font-size: 2vmin;
+            font-size: 2.5vmin;
             margin-top: 1vmin;
         }
         /* Announcer */
@@ -218,7 +218,7 @@
             top: 40%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            font-size: 10vmin;
+            font-size: 12vmin;
             color: var(--accent);
             text-shadow: 0 0 3vmin rgba(255,215,0,0.8);
             pointer-events: none;
