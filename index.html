@@ -252,18 +252,51 @@
             transform: translate(-50%, -50%) scale(1);
         }
 
-        /* Portrait Warning */
-        #portrait-warning {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #fff;
-            justify-content: center; align-items: center;
-            z-index: 9999; text-align: center; padding: 20px;
+        /* Themes */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2vmin;
+            margin-top: 2vmin;
+            max-width: 90vmin;
         }
 
-        @media (orientation: portrait) {
-            #portrait-warning { display: flex; }
+        .theme-card {
+            background: rgba(255,255,255,0.1);
+            border: 0.4vmin solid #444;
+            border-radius: 3vmin;
+            padding: 2vmin;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-card.active {
+            border-color: var(--accent);
+            background: rgba(255,215,0,0.1);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .theme-preview {
+            width: 100%;
+            height: 10vmin;
+            border-radius: 1.5vmin;
+            margin-bottom: 1vmin;
+        }
+
+        .preview-auto { background: linear-gradient(45deg, #2c3e50, #000); }
+        .preview-cyber { background: #000; border: 1px solid #ff00ff; box-shadow: inset 0 0 10px #ff00ff; }
+        .preview-galaxy { background: #0a0a2a; position: relative; }
+        .preview-volcanic { background: #4a0000; }
+        .preview-oceanic { background: #004466; }
+        .preview-disco { background: linear-gradient(45deg, #ff0000, #ff00ff, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000); }
+
+        @media (orientation: landscape) and (max-height: 600px) {
+            .theme-grid {
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 95vw;
+            }
         }
     </style>
 </head>
@@ -295,6 +328,7 @@
                 <button class="btn btn-secondary" onclick="game.startProChallenge()">Pro Challenge</button>
                 <button class="btn btn-secondary" onclick="game.startPassAndPlay()">2-Player Battle</button>
                 <button class="btn btn-secondary" onclick="game.openArmory()">Blaster Armory</button>
+                <button class="btn btn-secondary" onclick="game.openThemes()">Animated Themes</button>
                 <button class="btn btn-secondary" onclick="game.openSettings()">Settings</button>
             </div>
             <button class="btn btn-secondary" id="fullscreen-btn" onclick="game.toggleFullscreen()" style="max-width: 60vmin; margin-top: 1vmin;">Go Fullscreen</button>
@@ -315,6 +349,38 @@
         <div id="armory-screen" class="overlay">
             <h1>Blaster Armory</h1>
             <div class="blaster-grid" id="blaster-grid"></div>
+            <button class="btn" onclick="game.goToMenu()" style="margin-top: 2rem;">Back</button>
+        </div>
+
+        <!-- Themes Screen -->
+        <div id="themes-screen" class="overlay">
+            <h1>Animated Themes</h1>
+            <div class="theme-grid" id="theme-grid">
+                <div class="theme-card active" onclick="game.setTheme('auto')" id="theme-auto">
+                    <div class="theme-preview preview-auto"></div>
+                    <div>CLASSIC (AUTO)</div>
+                </div>
+                <div class="theme-card" onclick="game.setTheme('cyber')" id="theme-cyber">
+                    <div class="theme-preview preview-cyber"></div>
+                    <div>CYBER NEON</div>
+                </div>
+                <div class="theme-card" onclick="game.setTheme('galaxy')" id="theme-galaxy">
+                    <div class="theme-preview preview-galaxy"></div>
+                    <div>GALAXY</div>
+                </div>
+                <div class="theme-card" onclick="game.setTheme('volcanic')" id="theme-volcanic">
+                    <div class="theme-preview preview-volcanic"></div>
+                    <div>VOLCANIC</div>
+                </div>
+                <div class="theme-card" onclick="game.setTheme('oceanic')" id="theme-oceanic">
+                    <div class="theme-preview preview-oceanic"></div>
+                    <div>OCEANIC</div>
+                </div>
+                <div class="theme-card" onclick="game.setTheme('disco')" id="theme-disco">
+                    <div class="theme-preview preview-disco"></div>
+                    <div>DISCO FEVER</div>
+                </div>
+            </div>
             <button class="btn" onclick="game.goToMenu()" style="margin-top: 2rem;">Back</button>
         </div>
 
@@ -370,6 +436,10 @@
                 
                 this.tokens = parseInt(localStorage.getItem('targetRush_tokens')) || 0;
                 this.unlockedBlasters = JSON.parse(localStorage.getItem('targetRush_unlocks')) || ['elite'];
+                this.selectedTheme = localStorage.getItem('targetRush_theme') || 'auto';
+                
+                this.themeParticles = [];
+                this.initThemeParticles();
                 
                 this.blasters = [
                     { id: 'elite', name: 'Elite', fireRate: 333, special: 'None', cost: 0, color: '#00bfff' },
@@ -406,6 +476,56 @@
                 document.getElementById('shake-toggle').checked = this.settings.shake;
                 document.getElementById('colorblind-toggle').checked = this.settings.colorblind;
                 document.getElementById('music-toggle').checked = this.settings.music;
+                this.updateThemeUI();
+            }
+
+            openThemes() {
+                this.state = 'THEMES';
+                document.getElementById('main-menu').classList.remove('active');
+                document.getElementById('themes-screen').classList.add('active');
+            }
+
+            setTheme(themeId) {
+                this.selectedTheme = themeId;
+                localStorage.setItem('targetRush_theme', themeId);
+                this.updateThemeUI();
+                this.initThemeParticles();
+            }
+
+            updateThemeUI() {
+                document.querySelectorAll('.theme-card').forEach(card => card.classList.remove('active'));
+                const selectedCard = document.getElementById(`theme-${this.selectedTheme}`);
+                if (selectedCard) selectedCard.classList.add('active');
+            }
+
+            initThemeParticles() {
+                this.themeParticles = [];
+                const count = 50;
+                if (this.selectedTheme === 'galaxy') {
+                    for(let i=0; i<100; i++) this.themeParticles.push({
+                        x: Math.random() * CANVAS_WIDTH,
+                        y: Math.random() * CANVAS_HEIGHT,
+                        size: Math.random() * 3,
+                        speed: Math.random() * 0.5 + 0.1,
+                        opacity: Math.random()
+                    });
+                } else if (this.selectedTheme === 'oceanic') {
+                    for(let i=0; i<30; i++) this.themeParticles.push({
+                        x: Math.random() * CANVAS_WIDTH,
+                        y: CANVAS_HEIGHT + Math.random() * 100,
+                        size: Math.random() * 10 + 5,
+                        speed: Math.random() * 2 + 1,
+                        wobble: Math.random() * 2
+                    });
+                } else if (this.selectedTheme === 'volcanic') {
+                    for(let i=0; i<40; i++) this.themeParticles.push({
+                        x: Math.random() * CANVAS_WIDTH,
+                        y: CANVAS_HEIGHT + Math.random() * 100,
+                        size: Math.random() * 15 + 5,
+                        speed: Math.random() * 3 + 2,
+                        angle: Math.random() * Math.PI * 2
+                    });
+                }
             }
 
             saveSettings() {
@@ -739,6 +859,11 @@
             }
 
             drawBackground() {
+                if (this.selectedTheme !== 'auto') {
+                    this.drawAnimatedTheme(this.selectedTheme);
+                    return;
+                }
+
                 const theme = this.levelData[this.currentLevel]?.theme || 'default';
                 const w = CANVAS_WIDTH;
                 const h = CANVAS_HEIGHT;
@@ -771,12 +896,122 @@
                 }
             }
 
+            drawAnimatedTheme(theme) {
+                const w = CANVAS_WIDTH;
+                const h = CANVAS_HEIGHT;
+                const time = Date.now() / 1000;
+
+                if (theme === 'cyber') {
+                    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+                    ctx.strokeStyle = '#ff00ff'; ctx.lineWidth = 2;
+                    ctx.globalAlpha = 0.3;
+                    const offset = (time * 50) % 100;
+                    for(let i=-offset; i<w; i+=100) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke(); }
+                    for(let i=-offset; i<h; i+=100) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke(); }
+                    ctx.globalAlpha = 1;
+                    
+                    // Pulsing glow
+                    const glow = Math.sin(time * 2) * 0.2 + 0.3;
+                    ctx.shadowBlur = 20 * glow;
+                    ctx.shadowColor = '#00ffff';
+                    ctx.strokeStyle = '#00ffff';
+                    ctx.strokeRect(50, 50, w-100, h-100);
+                    ctx.shadowBlur = 0;
+                } else if (theme === 'galaxy') {
+                    ctx.fillStyle = '#000015'; ctx.fillRect(0, 0, w, h);
+                    // Nebula glow
+                    const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w/0.8);
+                    grad.addColorStop(0, '#0a0a2a');
+                    grad.addColorStop(0.5, '#1a0033');
+                    grad.addColorStop(1, '#000');
+                    ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+
+                    this.themeParticles.forEach(p => {
+                        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity * (Math.sin(time + p.x) * 0.5 + 0.5)})`;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        p.y += p.speed;
+                        if (p.y > h) p.y = -10;
+                    });
+                } else if (theme === 'volcanic') {
+                    ctx.fillStyle = '#1a0500'; ctx.fillRect(0, 0, w, h);
+                    const grad = ctx.createLinearGradient(0, h, 0, 0);
+                    grad.addColorStop(0, '#661100');
+                    grad.addColorStop(1, '#1a0500');
+                    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+
+                    this.themeParticles.forEach(p => {
+                        ctx.fillStyle = `rgba(255, ${100 + Math.random() * 155}, 0, ${0.5 + Math.random() * 0.5})`;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        p.y -= p.speed;
+                        p.x += Math.sin(time + p.y * 0.01) * 2;
+                        if (p.y < -20) { p.y = h + 20; p.x = Math.random() * w; }
+                    });
+                    
+                    // Pulsing red glow at bottom
+                    ctx.globalAlpha = Math.sin(time * 1.5) * 0.2 + 0.3;
+                    ctx.fillStyle = '#ff3300';
+                    ctx.fillRect(0, h - 100, w, 100);
+                    ctx.globalAlpha = 1;
+                } else if (theme === 'oceanic') {
+                    ctx.fillStyle = '#001a33'; ctx.fillRect(0, 0, w, h);
+                    const grad = ctx.createLinearGradient(0, 0, 0, h);
+                    grad.addColorStop(0, '#004466');
+                    grad.addColorStop(1, '#001a33');
+                    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+
+                    // Light rays
+                    ctx.globalAlpha = 0.1;
+                    ctx.fillStyle = '#fff';
+                    for(let i=0; i<5; i++) {
+                        ctx.beginPath();
+                        const x = (w / 5 * i) + Math.sin(time + i) * 100;
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x + 200, h);
+                        ctx.lineTo(x + 400, h);
+                        ctx.lineTo(x + 100, 0);
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1;
+
+                    this.themeParticles.forEach(p => {
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.stroke();
+                        p.y -= p.speed;
+                        p.x += Math.sin(time + p.y * 0.05) * p.wobble;
+                        if (p.y < -20) { p.y = h + 20; p.x = Math.random() * w; }
+                    });
+                } else if (theme === 'disco') {
+                    const hue = (time * 100) % 360;
+                    ctx.fillStyle = `hsl(${hue}, 30%, 10%)`; ctx.fillRect(0, 0, w, h);
+                    
+                    // Spotlight circles
+                    for(let i=0; i<8; i++) {
+                        const x = w/2 + Math.cos(time + i) * 600;
+                        const y = h/2 + Math.sin(time * 1.5 + i) * 400;
+                        const grad = ctx.createRadialGradient(x, y, 0, x, y, 300);
+                        grad.addColorStop(0, `hsla(${(hue + i * 45) % 360}, 100%, 50%, 0.3)`);
+                        grad.addColorStop(1, 'transparent');
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 300, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
             goToMenu() {
                 this.saveSettings();
                 this.state = 'MENU';
                 document.getElementById('results-screen').classList.remove('active');
                 document.getElementById('settings-screen').classList.remove('active');
                 document.getElementById('armory-screen').classList.remove('active');
+                document.getElementById('themes-screen').classList.remove('active');
                 document.getElementById('main-menu').classList.add('active');
             }
 
